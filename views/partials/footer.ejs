@@ -1,0 +1,44 @@
+<%
+  const year = new Date().getFullYear();
+  const showFooter = typeof hideFooter === 'undefined' || !hideFooter;
+%>
+<% if (showFooter) { %>
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>
+      <a class="brand" href="/">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="13" height="12" rx="3"/><path d="M15 10l6-3v10l-6-3"/></svg></span>
+        MeetRoom
+      </a>
+      <p>Schedule interviews, host secure video meetings, chat live and keep recordings in one place.</p>
+    </div>
+    <div>
+      <h4>Product</h4>
+      <ul>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/meetings/new">Schedule a session</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Account</h4>
+      <ul>
+        <% if (user) { %>
+          <li><a href="/dashboard">My sessions</a></li>
+        <% } else { %>
+          <li><a href="/login">Log in</a></li>
+          <li><a href="/register">Create account</a></li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">
+      <span>&copy; <%= year %> MeetRoom. All rights reserved.</span>
+      <span class="footer-status"><i></i> All systems operational</span>
+    </div>
+  </div>
+</footer>
+<% } %>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

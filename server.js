@@ -6,6 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import { Server } from "socket.io";
+import authRoutes from "./routers/authRoutes.js";
 
 
 
@@ -13,7 +14,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
+// ---------- VIEW ENGINE ----------
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
+// ---------- STATIC FILES ----------
+app.use(express.static(path.join(__dirname, "public")));
+
+// ---------- ROUTES ----------
+app.use("/auth", authRoutes);
 
 //Server Starting
 const PORT = process.env.PORT || 2000;

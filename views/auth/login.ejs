@@ -1,0 +1,30 @@
+<%- include('../partials/header', { title: 'Log in' }) %>
+
+
+<main class="auth">
+  <aside class="auth-aside">
+    <h2>Interviews and meetings, without the friction.</h2>
+    <p>Sign in to schedule sessions, share a room code and meet face to face from any browser.</p>
+    <ul class="auth-points">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> HD video, screen share and live chat</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> One-click recording for hosts</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Rate candidates and keep feedback</li>
+    </ul>
+  </aside>
+  <section class="auth-main">
+    <div class="auth-box">
+      <h1>Welcome back</h1>
+      <p class="auth-sub">Log in to your MeetRoom account.</p>
+      <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
+      <form method="post" action="/login" class="stack">
+        <label>Email <input type="email" name="email" placeholder="you@company.com" autocomplete="email" required autofocus></label>
+        <label>Password <input type="password" name="password" placeholder="Your password" autocomplete="current-password" required></label>
+        <button class="btn lg block" type="submit">Log in</button>
+      </form>
+      <p class="auth-switch">New here? <a href="/register">Create an account</a></p>
+    </div>
+  </section>
+</main>
+
+
+<%- include('../partials/footer', { hideFooter: true }) %>
