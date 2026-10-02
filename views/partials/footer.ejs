@@ -22,7 +22,7 @@
     <div>
       <h4>Account</h4>
       <ul>
-        <% if (user) { %>
+        <% if (typeof user !== "undefined" && user) { %>
           <li><a href="/dashboard">My sessions</a></li>
         <% } else { %>
           <li><a href="/login">Log in</a></li>

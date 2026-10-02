@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import express from "express";
 import { Server } from "socket.io";
 import authRoutes from "./routers/authRoutes.js";
+import { error } from "node:console";
 
 
 
@@ -24,6 +25,31 @@ app.use(express.static(path.join(__dirname, "public")));
 // ---------- ROUTES ----------
 app.get("/", (req, res) => res.redirect(req.user ? "/dashboard" : "/login"));
 app.use("/", authRoutes);
+
+
+ // ---------- 404 NOT FOUND ----------
+app.use((req, res, next) => {
+  res.status(404).render("errors/error", {
+    title: "Page Not Found",
+    code: 404,
+    message: "Sorry, the page you are looking for does not exist."
+  });
+});
+
+// ---------- GLOBAL ERROR HANDLER ----------
+app.use((err, req, res, next) => {
+  console.error(err);
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  res.status(500).render("errors/error", {
+    title: "Server Error",
+    code: 500,
+    message: "Something went wrong. Please try again."
+  });
+});
 
 //Server Starting
 const PORT = process.env.PORT || 2000;
