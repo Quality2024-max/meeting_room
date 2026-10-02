@@ -1,0 +1,30 @@
+<%- include('../partials/header', { title: 'Log in' }) %>
+
+<main class="auth">
+  <aside class="auth-aside">
+    <h2>Start hosting better interviews today.</h2>
+    <p>Create a free account and run your first session in under a minute.</p>
+    <ul class="auth-points">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Schedule and share a room code</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> No downloads, works in the browser</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Recordings saved to your dashboard</li>
+    </ul>
+  </aside>
+  <section class="auth-main">
+    <div class="auth-box">
+      <h1>Create your account</h1>
+      <p class="auth-sub">It only takes a few seconds.</p>
+      <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
+      <form method="post" action="/register" class="stack">
+        <label>Full name <input type="text" name="name" placeholder="Rahul Sharma" autocomplete="name" required autofocus></label>
+        <label>Email <input type="email" name="email" placeholder="you@company.com" autocomplete="email" required></label>
+        <label>Password <input type="password" name="password" minlength="6" placeholder="At least 6 characters" autocomplete="new-password" required>
+          <span class="hint">Use 6 or more characters.</span></label>
+        <button class="btn lg block" type="submit">Create account</button>
+      </form>
+      <p class="auth-switch">Already registered? <a href="/login">Log in</a></p>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer', { hideFooter: true }) %>

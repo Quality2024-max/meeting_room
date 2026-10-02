@@ -1,10 +1,11 @@
 import express from 'express';
-import { showLogin } from '../controllers/authController.js';
+import { showLogin, showRegister } from '../controllers/authController.js';
 
 
 const router = express.Router();
 
 router.get('/login', showLogin);
+router.get('/register', showRegister);
 
 
 

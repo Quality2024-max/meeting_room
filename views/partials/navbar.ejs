@@ -1,0 +1,37 @@
+<%
+  const path = typeof currentPath !== 'undefined' ? currentPath : '';
+  const isActive = (p) => (path === p || path.startsWith(p + '/')) ? 'active' : '';
+  const initials = user ? user.name.split(' ').map((w) => w[0]).slice(0, 2).join('') : '';
+%>
+<header class="navbar">
+  <div class="container navbar-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="13" height="12" rx="3"/><path d="M15 10l6-3v10l-6-3"/></svg>
+      </span>
+      MeetRoom
+    </a>
+
+    <% if (user) { %>
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav class="nav-links" id="navLinks" aria-label="Main">
+        <a class="nav-link <%= isActive('/dashboard') %>" href="/dashboard">Dashboard</a>
+        <a class="nav-link <%= isActive('/meetings/new') %>" href="/meetings/new">Schedule</a>
+        <div class="nav-user">
+          <span class="avatar" aria-hidden="true"><%= initials %></span>
+          <div>
+            <div class="nav-user-name"><%= user.name %></div>
+            <form method="post" action="/logout"><button class="nav-logout" type="submit">Log out</button></form>
+          </div>
+        </div>
+      </nav>
+    <% } else { %>
+      <nav class="nav-links" aria-label="Main">
+        <a class="nav-link <%= isActive('/login') %>" href="/login">Log in</a>
+        <a class="btn" href="/register">Get started</a>
+      </nav>
+    <% } %>
+  </div>
+</header>
