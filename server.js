@@ -22,7 +22,8 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // ---------- ROUTES ----------
-app.use("/auth", authRoutes);
+app.get("/", (req, res) => res.redirect(req.user ? "/dashboard" : "/login"));
+app.use("/", authRoutes);
 
 //Server Starting
 const PORT = process.env.PORT || 2000;
