@@ -9,6 +9,8 @@ import { Server } from "socket.io";
 import authRoutes from "./routers/authRoutes.js";
 import { error } from "node:console";
 
+import {attachUser} from "./middlewares/authMiddleware.js";
+
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -19,8 +21,19 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+// ---------- BODY PARSING + COOKIES ----------
+app.use(express.urlencoded({ extended: false}));
+app.use(express.json());
+
 // ---------- STATIC FILES ----------
 app.use(express.static(path.join(__dirname, "public")));
+
+// ---------- JWT USER + GLOBAL VIEW VARIABLES ----------
+app.use(attachUser);
+app.use((req, res, next) => {
+  res.locals.currentPath = req.path;
+  next();
+})
 
 // ---------- ROUTES ----------
 app.get("/", (req, res) => res.redirect(req.user ? "/dashboard" : "/login"));
