@@ -40,4 +40,24 @@ export  const postRegister  = async (req, res) => {
 console.error(error);
     res.render('auth/register', { error: 'Could not create the account. Try again.' });
  }
+};
+
+export const postLogin = async (req, res) => {
+   const {email, password} = req.body;
+   try{
+      const user = await User.findByEmail((email || '').trim().toLowerCase());
+      if(!user || !(await bcrypt.compare(password || '', user.password_hash))){
+         return res.render(auth/login, {error: "Email or password is incorrect."});
+      }
+      res.cookie('token', signToken(user), cookieOpts);
+      res.redirect('/dashboard');
+   }catch(error){
+      console.error(error);
+      res.render('auth/login', {error: 'Could not log in. Try again.'})
+   }
+};
+
+export const logout = (req, res) => {
+   res.clearCookie('token');
+   res.redirect('/login')
 }

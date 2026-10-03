@@ -1,7 +1,7 @@
 import "dotenv/config";
 import jwt from "jsonwebtoken";
 
-export function signToken(user) {
+export const signToken = (user) => {
   return jwt.sign(
     { id: user.id, name: user.name, email: user.email },
     process.env.JWT_SECRET,
@@ -11,7 +11,9 @@ export function signToken(user) {
   );
 }
 
-export function attachUser(req, res, next) {
+
+
+export const attachUser = (req, res, next) => {
     try {
         const token = req.cookies?.token;
 
@@ -33,4 +35,9 @@ export function attachUser(req, res, next) {
 
         next(error);
     }
-}
+};
+
+export const requireAuth = (req, res, next) =>{
+ if(!req.user) return res.redirect('/login');
+ next();
+};

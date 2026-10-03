@@ -6,11 +6,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import { Server } from "socket.io";
-import authRoutes from "./routers/authRoutes.js";
+
 import { error } from "node:console";
 
-import {attachUser} from "./middlewares/authMiddleware.js";
 
+// ---------- IMPORT MIDDLEWARES ----------
+import {attachUser} from "./middlewares/authMiddleware.js";
+import authRoutes from "./routers/authRoutes.js";
+import meetingRoutes from "./routers/meetingRoutes.js";
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -38,7 +41,7 @@ app.use((req, res, next) => {
 // ---------- ROUTES ----------
 app.get("/", (req, res) => res.redirect(req.user ? "/dashboard" : "/login"));
 app.use("/", authRoutes);
-
+app.use("/", meetingRoutes);
 
  // ---------- 404 NOT FOUND ----------
 app.use((req, res, next) => {
