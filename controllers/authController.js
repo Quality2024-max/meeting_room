@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import User from "../models/userModel.js";
-import {signToken} from '../middlewares/authMiddleware.js'
+import {attachUser, signToken} from '../middlewares/authMiddleware.js'
 
 const cookieOpts = {
     httpOnly: true,
@@ -9,10 +9,12 @@ const cookieOpts = {
 }
 
 export const showLogin = (req, res) => {
+    if (req.user) return res.redirect('/dashboard');
  res.render('auth/login', { error: null });
 }
 
 export const showRegister = (req, res) => {
+   // if (req.user) return res.redirect('/dashboard');
  res.render('auth/register', { error: null })
 };
 

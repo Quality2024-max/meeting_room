@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
+import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 
 import { error } from "node:console";
@@ -27,6 +28,7 @@ app.set("views", path.join(__dirname, "views"));
 // ---------- BODY PARSING + COOKIES ----------
 app.use(express.urlencoded({ extended: false}));
 app.use(express.json());
+app.use(cookieParser());
 
 // ---------- STATIC FILES ----------
 app.use(express.static(path.join(__dirname, "public")));
