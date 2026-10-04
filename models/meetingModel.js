@@ -19,6 +19,11 @@ const Meeting = {
         );
         return result.insertId;
     },
+
+
+    async remove(id, hostId){
+        await db.query('DELETE FROM meetings WHERE id = ? AND host_id = ?', [id, hostId])
+    },
 }
 
 export default Meeting;

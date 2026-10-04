@@ -42,3 +42,10 @@ export const create = async (req, res) => {
   res.redirect('/dashboard');
 }
 
+
+export const remove = async (req, res) => {
+
+await Meeting.remove(req.params.id, req.user.id);
+res.redirect('/dashboard');
+}
+
