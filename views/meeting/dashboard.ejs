@@ -1,8 +1,103 @@
 <%- include('../partials/header', { title: 'Dashboard' }) %>
 <%- include('../partials/navbar') %>
 
-<h1>Wellcom to Meeting Room</h1>
 
+
+<main class="container page">
+<%
+  const fmtSize = (b) => { b = Number(b); return b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; };
+  const fmtDur = (s) => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+%>
+<%
+  const total = meetings.length;
+  const live = meetings.filter((m) => m.status === 'live').length;
+  const upcoming = meetings.filter((m) => m.status === 'scheduled').length;
+  const recCount = Object.values(recordings).reduce((n, list) => n + list.length, 0);
+%>
+<div class="dash-head">
+  <div>
+    <h1>Hello, <%= user.name.split(' ')[0] %></h1>
+    <p>Here is what is happening with your interviews and meetings.</p>
+  </div>
+  <a class="btn lg" href="/meetings/new">+ Schedule a session</a>
+</div>
+
+<section class="stats" aria-label="Summary">
+  <div class="stat"><b><%= total %></b><span>Total sessions</span></div>
+  <div class="stat"><b><%= upcoming %></b><span>Upcoming</span></div>
+  <div class="stat"><b><%= live %></b><span>Live now</span></div>
+  <div class="stat"><b><%= recCount %></b><span>Recordings</span></div>
+</section>
+
+<form method="post" action="/join" class="join">
+  <input type="text" name="code" placeholder="Have a room code? Paste it here">
+  <button class="btn ghost" type="submit">Join room</button>
+</form>
+<% if (joinError) { %><p class="alert"><%= joinError %></p><% } %>
+
+<% if (!meetings.length) { %>
+  <div class="empty">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    <h2>No sessions yet</h2>
+    <p>Schedule your first interview or meeting to get a shareable room code.</p>
+    <a class="btn" href="/meetings/new">Schedule a session</a>
+  </div>
+<% } %>
+
+<% meetings.forEach(m => { %>
+  <article class="card session">
+    <div class="row between">
+      <div>
+        <h2><%= m.title %></h2>
+        <p class="muted">
+          <span class="type-chip <%= m.type %>"><%= m.type === 'interview' ? 'Interview' : 'Meeting' %></span>
+          <% if (m.candidate_name) { %>with <%= m.candidate_name %> &middot; <% } %>
+          <%= m.scheduled_at %> (<%= m.duration_min %> min)
+        </p>
+        <p class="muted">Room code: <code><%= m.room_code %></code></p>
+      </div>
+      <span class="badge <%= m.status %>"><%= m.status %></span>
+    </div>
+
+    <div class="row actions">
+      <% if (m.status !== 'ended') { %>
+        <a class="btn" href="/room/<%= m.room_code %>"><%= m.status === 'live' ? 'Rejoin room' : 'Start room' %></a>
+        <form method="post" action="/meetings/<%= m.id %>/end"><button class="btn ghost" type="submit">End session</button></form>
+      <% } %>
+      <form method="post" action="/meetings/<%= m.id %>/delete" onsubmit="return confirm('Delete this session and its chat?')">
+        <button class="btn danger" type="submit">Delete</button>
+      </form>
+    </div>
+
+    <% if (recordings[m.id]) { %>
+      <div class="recordings">
+        <h3>Recordings</h3>
+        <% recordings[m.id].forEach(r => { %>
+          <div class="row rec-row">
+            <span class="muted"><%= r.created_at %> &middot; <%= fmtDur(r.duration_sec) %> &middot; <%= fmtSize(r.size_bytes) %></span>
+            <a class="btn ghost" href="/recordings/<%= r.id %>" target="_blank" rel="noopener">Play</a>
+            <a class="btn ghost" href="/recordings/<%= r.id %>?download=1">Download</a>
+            <form method="post" action="/recordings/<%= r.id %>/delete" onsubmit="return confirm('Delete this recording?')">
+              <button class="btn danger" type="submit">Delete</button>
+            </form>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <% if (m.type === 'interview') { %>
+      <form method="post" action="/meetings/<%= m.id %>/feedback" class="row feedback">
+        <select name="rating">
+          <option value="">Rating</option>
+          <% for (let i = 1; i <= 5; i++) { %><option value="<%= i %>" <%= m.rating === i ? 'selected' : '' %>><%= i %> / 5</option><% } %>
+        </select>
+        <input type="text" name="feedback" value="<%= m.feedback || '' %>" placeholder="Interview feedback">
+        <button class="btn ghost" type="submit">Save feedback</button>
+      </form>
+    <% } %>
+  </article>
+<% }) %>
+</main>
  
 
 <%- include('../partials/footer') %>
