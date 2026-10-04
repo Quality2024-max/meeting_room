@@ -1,0 +1,33 @@
+<%- include('../partials/header', { title: 'Schedule' }) %>
+<%- include('../partials/navbar') %>
+
+<main class="container page">
+  <div class="form-shell">
+    <a class="back" href="/dashboard">&larr; Back to dashboard</a>
+    <section class="card form-card">
+      <h1>Schedule a session</h1>
+      <p>Set up an interview or meeting. You will get a room code to share.</p>
+      <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
+      <form method="post" action="/meetings">
+        <div class="form-grid">
+          <label class="full">Title <input type="text" name="title" placeholder="Backend developer round 1" required></label>
+          <label>Type
+            <select name="type">
+              <option value="interview">Interview</option>
+              <option value="meeting">Meeting</option>
+            </select>
+          </label>
+          <label>Candidate name (interviews) <input type="text" name="candidate_name" placeholder="Optional"></label>
+          <label>Starts at <input type="datetime-local" name="scheduled_at" required></label>
+          <label>Duration (minutes) <input type="number" name="duration_min" value="30" min="5" max="240"></label>
+        </div>
+        <div class="form-actions">
+          <a class="btn ghost" href="/dashboard">Cancel</a>
+          <button class="btn" type="submit">Schedule session</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

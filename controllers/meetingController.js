@@ -17,5 +17,7 @@ export const getDashboard = async (req, res) => {
   res.render('meeting/dashboard', { meetings, recordings, joinError: req.query.error || null });
 }
 
-
+export const newForm = (req, res) => {
+  res.render('meeting/new-meeting', {error: null});
+}
 
