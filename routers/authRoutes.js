@@ -1,6 +1,7 @@
 import express from 'express';
-import { showLogin, showRegister, postRegister, postLogin, logout } from '../controllers/authController.js';
 import wrap from '../middlewares/asyncMiddleware.js';
+import { showLogin, showRegister, postRegister, postLogin, logout } from '../controllers/authController.js';
+
 
 
 
