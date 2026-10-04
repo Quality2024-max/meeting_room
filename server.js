@@ -72,5 +72,5 @@ app.use((err, req, res, next) => {
 //Server Starting
 const PORT = process.env.PORT || 2000;
 app.listen(PORT, () => {
-  console.log(`Server is runing on http://localhost:${PORT}`);
+  console.log(`Server is runing on http://localhost:${PORT}\nhttps://meeting-room-lunw.onrender.com/login`);
 });

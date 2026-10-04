@@ -1,4 +1,5 @@
 import db from '../config/db.js';
+import { create } from '../controllers/meetingController.js';
 
 const Meeting = {
     async findByHost(hostId){
@@ -7,7 +8,17 @@ const Meeting = {
             [hostId]
         );
         return rows;
-    }
+    },
+
+
+    async create({roomCode, title, type, hostId, candidateName, scheduledAt, durationMin}) {
+        const [result] = await db.query(
+            `INSERT INTO meetings (room_code, title, type, host_id, candidate_name, scheduled_at, duration_min)
+            VALUES (?,?,?,?,?,?,?)`,
+            [roomCode, title, type, hostId, candidateName, scheduledAt, durationMin]
+        );
+        return result.insertId;
+    },
 }
 
 export default Meeting;
