@@ -21,30 +21,6 @@ export const readUser = (token) => {
 
 
 
-// export const attachUser = (req, res, next) => {
-//     try {
-//         const token = req.cookies?.token;
-
-//         if (token) {
-//             req.user = jwt.verify(token, process.env.JWT_SECRET);
-//         } else {
-//             req.user = null;
-//         }
-
-//         res.locals.user = req.user;
-//         next();
-//     } catch (error) {
-//         if (error.name === "JsonWebTokenError" ||
-//             error.name === "TokenExpiredError") {
-//             req.user = null;
-//             res.locals.user = null;
-//             return next();
-//         }
-
-//         next(error);
-//     }
-// };
-
 
 // Makes req.user / res.locals.user available on every request
 export function attachUser(req, res, next) {
