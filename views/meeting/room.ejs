@@ -1,0 +1,66 @@
+<%- include('../partials/header', { title: meeting.title }) %>
+<%- include('../partials/navbar') %>
+<main class="container page room-page">
+<div class="row between room-head">
+  <div>
+    <h1><%= meeting.title %></h1>
+    <p class="muted">Share this room code to invite people: <code><%= meeting.room_code %></code></p>
+  </div>
+  <div class="row">
+    <span id="recBadge" class="rec-badge" hidden><i></i><b id="recLabel">Recording</b></span>
+    <a class="btn ghost" href="/dashboard">Leave room</a>
+  </div>
+</div>
+
+<div class="room">
+  <section class="videos">
+    <div id="grid" class="grid">
+      <div class="tile" id="tile-local"><video id="localVideo" autoplay muted playsinline></video><span>You<% if (isHost) { %> (Host)<% } %></span></div>
+    </div>
+    <div class="row controls">
+      <button class="btn ghost" id="toggleMic" type="button">Mute mic</button>
+      <select id="micSelect" class="mic-select" title="Choose microphone" hidden></select>
+      <select id="speakerSelect" class="mic-select" title="Choose where you hear everyone (speaker / headphones)" hidden></select>
+      <span class="meter" title="Microphone level - moves when you speak"><i id="micLevel"></i></span>
+      <button class="btn ghost" id="toggleCam" type="button">Turn camera off</button>
+      <button class="btn ghost" id="shareScreen" type="button">Share screen</button>
+      <label class="chk" title="Also share the computer / tab sound when sharing the screen"><input type="checkbox" id="shareAudio" checked> Share sound</label>
+      <% if (isHost) { %>
+        <button class="btn ghost" id="recordBtn" type="button" title="Record the whole meeting (video + everyone's audio)">Start recording</button>
+        <button class="btn ghost" id="muteAll" type="button">Mute all</button>
+        <button class="btn ghost" id="unmuteAll" type="button" title="Everyone gets a one-click prompt to unmute">Unmute all</button>
+      <% } %>
+    </div>
+    <p id="mediaNotice" class="alert" hidden></p>
+    <p id="roomStatus" class="muted"></p>
+  </section>
+
+  <aside class="chat card">
+    <h2>Chat</h2>
+    <div id="messages" class="messages">
+      <% history.forEach(h => { %>
+        <p><strong><%= h.name %></strong> <%= h.message %></p>
+      <% }) %>
+    </div>
+    <form id="chatForm" class="row">
+      <input id="chatInput" type="text" placeholder="Type a message" autocomplete="off">
+      <button class="btn" type="submit">Send</button>
+    </form>
+  </aside>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<div id="hostBanner" class="banner" role="status" hidden>
+  <span id="hostBannerText"></span>
+  <button class="btn" id="hostBannerAction" type="button" hidden></button>
+  <button class="btn ghost" id="hostBannerClose" type="button">Dismiss</button>
+</div>
+
+<script>
+  window.ROOM_CODE = <%- JSON.stringify(meeting.room_code) %>;
+  window.MEETING_ID = <%- JSON.stringify(meeting.id) %>;
+  window.IS_HOST = <%- JSON.stringify(Boolean(isHost)) %>;
+</script>
+<script src="/js/room.js"></script>
+</main>
+<%- include('../partials/footer', { hideFooter: true }) %>
