@@ -34,6 +34,9 @@ const Meeting = {
     );
     return result.insertId;
   },
+  async markLive(id) {
+    await db.query("UPDATE meetings SET status = 'live' WHERE id = ?", [id]);
+  },
 
   async end(id, hostId) {
     await db.query(

@@ -9,6 +9,12 @@ const ChatMessage = {
     );
     return rows;
   },
+  async create({ meetingId, userId, message }) {
+    await db.query(
+      "INSERT INTO chat_messages (meeting_id, user_id, message) VALUES (?, ?, ?)",
+      [meetingId, userId, message],
+    );
+  },
 };
 
 export default ChatMessage;
