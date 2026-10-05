@@ -1,7 +1,13 @@
 import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import Meeting from "../models/meetingModel.js";
 import Recording from "../models/recordingModel.js";
 import ChatMessage from "../models/chatMessageModel.js";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const REC_DIR = path.join(__dirname, "..", "recordings");
 
 const newCode = () => crypto.randomBytes(4).toString("hex"); // 8 chars
 
@@ -70,7 +76,30 @@ export const room = async (req, res) => {
   });
 };
 
+export const end = async (req, res) => {
+  await Meeting.end(req.params.id, req.user.id);
+  res.redirect("/dashboard");
+};
+
+export const feedback = async (req, res) => {
+  const rating =
+    Math.min(5, Math.max(1, parseInt(req.body.rating, 10) || 0)) || null;
+
+  await Meeting.saveFeedback(
+    req.params.id,
+    req.user.id,
+    rating,
+    req.body.feedback || null,
+  );
+  res.redirect("/dashboard");
+};
+
 export const remove = async (req, res) => {
+  // remove the recording files too (the DB rows go away with the meeting)
+  const files = await Recording.fileNamesByMeeting(req.params.id, req.user.id);
+  files.forEach((f) =>
+    fs.unlink(path.join(REC_DIR, path.basename(f)), () => {}),
+  );
   await Meeting.remove(req.params.id, req.user.id);
   res.redirect("/dashboard");
 };

@@ -8,6 +8,8 @@ import {
   remove,
   join,
   room,
+  end,
+  feedback,
 } from "../controllers/meetingController.js";
 
 const router = express.Router();
@@ -18,6 +20,8 @@ router.get("/meetings/new", newForm);
 router.post("/meetings", create);
 router.post("/join", join);
 router.get("/room/:code", wrap(room));
+router.post("/meetings/:id/end", wrap(end));
+router.post("/meetings/:id/feedback", wrap(feedback));
 router.post("/meetings/:id/delete", wrap(remove));
 
 export default router;

@@ -35,6 +35,20 @@ const Meeting = {
     return result.insertId;
   },
 
+  async end(id, hostId) {
+    await db.query(
+      "UPDATE meetings SET status = 'ended' WHERE id = ? AND host_id = ?",
+      [id, hostId],
+    );
+  },
+
+  async saveFeedback(id, hostId, rating, feedback) {
+    await db.query(
+      "UPDATE meetings SET rating = ?, feedback = ? WHERE id = ? AND host_id =?",
+      [rating, feedback, id, hostId],
+    );
+  },
+
   async remove(id, hostId) {
     await db.query("DELETE FROM meetings WHERE id = ? AND host_id = ?", [
       id,
