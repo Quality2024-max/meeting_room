@@ -5,6 +5,9 @@ import Meeting from "../models/meetingModel.js";
 import Recording from "../models/recordingModel.js";
 import ChatMessage from "../models/chatMessageModel.js";
 import { fileURLToPath } from "node:url";
+import { signGuestToken } from "../middlewares/authMiddleware.js";
+import { sendMail, isMailConfigured } from '../services/mailService.js';
+import { error } from "node:console";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REC_DIR = path.join(__dirname, "..", "recordings");
@@ -60,20 +63,196 @@ export const join = (req, res) => {
 };
 
 export const room = async (req, res) => {
-  const meeting = await Meeting.findByCode(req.params.code);
-  if (!meeting)
-    return res.redirect(
-      "/dashboard?error=No meeting found for that room code.",
-    );
-  if (meeting.status === "ended")
-    return res.redirect("/dashboard?error=That meeting has ended.");
+  const code = req.params.code;
+  const meeting = await Meeting.findByCode(code);
 
+  const guestOk = !req.user && req.guest && req.guest.room === code;
+  // Nobody identified yet: logged-out visitors go to the "enter your name" page
+  if (!req.user && !guestOk) {
+    return res.redirect("/join/" + encodeURIComponent(code));
+  }
+
+  if (!meeting) {
+    if (req.user)
+      return res.redirect(
+        "/dashboard?error=No meeting found for that room code.",
+      );
+    return notAvailable(
+      res,
+      "Meeting not found', 'Please check the meeting code in your invitation.",
+    );
+  }
+  if (meeting.status === "ended") {
+    if (req.user)
+      return res.redirect("/dashboard?error=That meeting has ended.");
+    return notAvailable(
+      res,
+      "Meeting ended",
+      "This meeting has already ended.",
+    );
+  }
   const history = await ChatMessage.listByMeeting(meeting.id, 100);
   res.render("meeting/room", {
     meeting,
     history,
-    isHost: meeting.host_id === req.user.id,
+    isHost: Boolean(req.user) && meeting.host_id === req.user.id,
+    leaveUrl: req.user ? "/dashboard" : "/",
   });
+};
+
+// ---------- PUBLIC: candidate opens the invite link ----------
+export const showGuestJoin = async (req, res) => {
+  const code = req.params.code;
+  if (req.user) return res.redirect("/room" + encodeURIComponent(code)); // logged-in users skip the form
+
+  const meeting = await Meeting.findByCode(code);
+  if (!meeting)
+    return notAvailable(
+      res,
+      "Meeting not found",
+      "Please check the meeting code in your invitation.",
+    );
+  if (meeting.status === "ended")
+    return notAvailable(
+      res,
+      "Meeting ended",
+      "This meeting has already ended.",
+    );
+
+  res.render("meeting/guest-join", {
+    meeting,
+    error: null,
+    name: req.guest && req.guest.room === code ? req.guest.name : "",
+  });
+};
+
+export const guestJoin = async (req, res) => {
+  const code = req.params.code;
+  if (req.user)
+    return notAvailable(
+      res,
+      "Meeting not found",
+      "Please check the meeting code in your invitation.",
+    );
+  const meeting = await Meeting.findByCode(code);
+  if (meeting.status === "ended")
+    return notAvailable(
+      res,
+      "Meeting ended",
+      "This meeting has already ended.",
+    );
+
+  const name = String(req.body.name || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 60);
+  if (name.length < 2) {
+    return res.status(400).render("meeting/guest-join", {
+      meeting,
+      name,
+      error: "Please enter your full name (at least 2 letters).",
+    });
+  }
+
+  res.cookie("guest_token", signGuestToken({ name, room: meeting.room_code }), {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 12 * 60 * 60 * 1000,
+  });
+  res.redirect("/room/" + encodeURIComponent(meeting.room_code));
+};
+
+// Joining by code from the logged-out home / invite email: /join-code form is dashboard only,
+// so a guest who only has the code uses  /join/<code>.
+
+// ---------- HOST: send invitation emails ----------
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_INVITES = 20;
+
+export const invite = async (req, res) => {
+  const meeting = await Meeting.findOwned(req.params.id, req.user.id);
+  if (!meeting)
+    return res.status(404).json({ ok: false, error: "Meeting not found." });
+  if (meeting.status === "ended")
+    return res
+      .status(400)
+      .json({ ok: false, error: "This meeting has ended." });
+
+  const emails = [
+    ...new Set(
+      String(req.body.emails || "")
+        .split(/[\s,;]+/)
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ];
+  const message = String(req.body.message || "")
+    .trim()
+    .slice(0, 3000);
+  const subject =
+    String(req.body.subject || "")
+      .replace(/[\r\n]+/g, " ")
+      .trim()
+      .slice(0, 200) || `Invitation: ${meeting.title}`;
+
+  if (!emails.length)
+    return res
+      .status(400)
+      .json({ ok: false, error: "Add at least one candidate email." });
+  if (emails.length > MAX_INVITES)
+    return res
+      .status(400)
+      .json({
+        ok: false,
+        error: `You can invite up to ${MAX_INVITES} people at a time.`,
+      });
+  if (!message)
+    return res
+      .status(400)
+      .json({ ok: false, error: "The email message cannot be empty." });
+  const invalid = emails.filter((e) => !EMAIL_RE.test(e));
+  if (invalid.length)
+    return res
+      .status(400)
+      .json({ ok: false, error: "Invalid email: " + invalid.join(", ") });
+
+  const joinUrl = `${appUrl(req)}/join/${encodeURIComponent(meeting.room_code)}`;
+  const { text, html } = buildInvite({ meeting, message, joinUrl });
+
+  // one mail per candidate, so nobody sees the other candidates' addresses
+  const results = await Promise.allSettled(
+    emails.map((to) => sendMail({ to, subject, text, html })),
+  );
+
+  const sent = [];
+  const failed = [];
+  results.forEach((r, i) => {
+    if (r.status === "fulfilled") sent.push(emails[i]);
+    else {
+      console.error(
+        "Invite mail failed for",
+        emails[i],
+        r.reason && r.reason.message,
+      );
+      failed.push(emails[i]);
+    }
+  });
+
+  res.json({
+    ok: failed.length === 0,
+    sent,
+    failed,
+    mailConfigured: isMailConfigured,
+  });
+};
+
+const appUrl = () => {
+  const fromEnv = (process.env.APP_URL || "").trim().replace(/\/+$/, "");
+  return fromEnv || `${req.protocol}://${req.get("host")}`;
+};
+
+const notAvailable = (res, title, message) => {
+  return res.status(404).render("errors/error", { title, code: 404, message });
 };
 
 export const end = async (req, res) => {

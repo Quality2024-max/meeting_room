@@ -1,7 +1,5 @@
 <%- include('../partials/header', { title: 'Dashboard' }) %>
 <%- include('../partials/navbar') %>
-
-
 <main class="container page">
 <%
   const fmtSize = (b) => { b = Number(b); return b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; };
@@ -61,6 +59,18 @@
     <div class="row actions">
       <% if (m.status !== 'ended') { %>
         <a class="btn" href="/room/<%= m.room_code %>"><%= m.status === 'live' ? 'Rejoin room' : 'Start room' %></a>
+        <%
+          const whenTxt = String(m.scheduled_at).slice(0, 16);
+          const kind = m.type === 'interview' ? 'interview' : 'meeting';
+          const defaultMsg = 'Hi,\n\nYou are invited to a ' + kind + ' "' + m.title + '" on ' + whenTxt + ' (' + m.duration_min + ' min).\n\nPlease use the link below to join. You do not need an account - just enter your name when you open it.\n\nRegards,\n' + user.name;
+        %>
+        <button class="btn ghost" type="button" data-invite
+          data-id="<%= m.id %>"
+          data-title="<%= m.title %>"
+          data-code="<%= m.room_code %>"
+          data-candidate="<%= m.candidate_name || '' %>"
+          data-message="<%= defaultMsg %>"
+          data-subject="<%= (m.type === 'interview' ? 'Interview invitation: ' : 'Meeting invitation: ') + m.title %>">Invite candidates</button>
         <form method="post" action="/meetings/<%= m.id %>/end"><button class="btn ghost" type="submit">End session</button></form>
       <% } %>
       <form method="post" action="/meetings/<%= m.id %>/delete" onsubmit="return confirm('Delete this session and its chat?')">
@@ -96,7 +106,36 @@
     <% } %>
   </article>
 <% }) %>
-</main>
- 
 
+<dialog id="inviteDialog" class="modal">
+  <form id="inviteForm" method="dialog">
+    <div class="modal-head">
+      <h2>Invite candidates</h2>
+      <button type="button" class="modal-x" id="inviteClose" aria-label="Close">&times;</button>
+    </div>
+    <p class="muted" id="inviteFor"></p>
+
+    <label>Candidate email(s)
+      <textarea name="emails" id="inviteEmails" rows="2" placeholder="a@example.com, b@example.com" required></textarea>
+      <small class="muted">Separate several emails with a comma, space or new line (max 20).</small>
+    </label>
+    <label>Subject
+      <input type="text" name="subject" id="inviteSubject" maxlength="200" required>
+    </label>
+    <label>Email message
+      <textarea name="message" id="inviteMessage" rows="8" required></textarea>
+    </label>
+    <p class="invite-note">The <b>join link</b> and the <b>meeting code</b> are added to the email automatically.</p>
+
+    <p class="alert" id="inviteError" role="alert" hidden></p>
+    <p class="ok-box" id="inviteOk" role="status" hidden></p>
+
+    <div class="form-actions">
+      <button type="button" class="btn ghost" id="inviteCancel">Close</button>
+      <button type="submit" class="btn" id="inviteSend">Send invitation</button>
+    </div>
+  </form>
+</dialog>
+<script src="/js/invite.js"></script>
+</main>
 <%- include('../partials/footer') %>

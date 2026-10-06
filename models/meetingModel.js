@@ -18,6 +18,22 @@ const Meeting = {
     return rows[0] || null;
   },
 
+  async findOwned(id, hostId) {
+    const [rows] = await db.query(
+      "SELECT * FROM meetings WHERE id = ? AND host_id  =?",
+      [id, hostId],
+    );
+    return rows[0] || null;
+  },
+
+  async isOwnedBy(id, hostId) {
+    const [rows] = await db.query(
+      "SELECT id FROM meetings WHERE id = ? AND host_id ?",
+      [id, hostId],
+    );
+    return rows.length > 0;
+  },
+
   async create({
     roomCode,
     title,

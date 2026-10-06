@@ -10,16 +10,24 @@ import {
   room,
   end,
   feedback,
+  showGuestJoin,
+  guestJoin,
+  invite,
 } from "../controllers/meetingController.js";
 
 const router = express.Router();
+router.get("/join/:code", wrap(showGuestJoin));
+router.post("/join/:code", wrap(guestJoin));
+
+router.get("/room/:code", wrap(room));
+
 router.use(requireAuth);
 
 router.get("/dashboard", wrap(getDashboard));
 router.get("/meetings/new", newForm);
 router.post("/meetings", create);
 router.post("/join", join);
-router.get("/room/:code", wrap(room));
+router.post("meetings/:id/invite", wrap(invite));
 router.post("/meetings/:id/end", wrap(end));
 router.post("/meetings/:id/feedback", wrap(feedback));
 router.post("/meetings/:id/delete", wrap(remove));

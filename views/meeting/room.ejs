@@ -8,7 +8,7 @@
   </div>
   <div class="row">
     <span id="recBadge" class="rec-badge" hidden><i></i><b id="recLabel">Recording</b></span>
-    <a class="btn ghost" href="/dashboard">Leave room</a>
+    <a class="btn ghost" href="<%= leaveUrl %>">Leave room</a>
   </div>
 </div>
 
@@ -36,7 +36,18 @@
   </section>
 
   <aside class="chat card">
-    <h2>Chat</h2>
+    <% if (isHost) { %>
+      <div class="chat-tabs" role="tablist">
+        <button type="button" class="chat-tab active" id="tabChat" role="tab" aria-selected="true">Chat</button>
+        <button type="button" class="chat-tab" id="tabGuests" role="tab" aria-selected="false">Candidates <span class="count-pill" id="guestCount">0</span></button>
+      </div>
+      <div id="guestPanel" class="guest-panel" hidden>
+        <p class="muted" id="guestSummary">No invited candidates have joined yet.</p>
+        <ul id="guestList" class="guest-list"></ul>
+      </div>
+    <% } else { %>
+      <h2>Chat</h2>
+    <% } %>
     <div id="messages" class="messages">
       <% history.forEach(h => { %>
         <p><strong><%= h.name %></strong> <%= h.message %></p>
