@@ -8,8 +8,6 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 
-import { error } from "node:console";
-
 // ---------- IMPORT MIDDLEWARES ----------
 import { attachUser } from "./middlewares/authMiddleware.js";
 import authRoutes from "./routers/authRoutes.js";

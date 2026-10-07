@@ -104,7 +104,7 @@ export const room = async (req, res) => {
 // ---------- PUBLIC: candidate opens the invite link ----------
 export const showGuestJoin = async (req, res) => {
   const code = req.params.code;
-  if (req.user) return res.redirect("/room" + encodeURIComponent(code)); // logged-in users skip the form
+  if (req.user) return res.redirect("/room/" + encodeURIComponent(code)); // logged-in users skip the form
 
   const meeting = await Meeting.findByCode(code);
   if (!meeting)
@@ -201,12 +201,10 @@ export const invite = async (req, res) => {
       .status(400)
       .json({ ok: false, error: "Add at least one candidate email." });
   if (emails.length > MAX_INVITES)
-    return res
-      .status(400)
-      .json({
-        ok: false,
-        error: `You can invite up to ${MAX_INVITES} people at a time.`,
-      });
+    return res.status(400).json({
+      ok: false,
+      error: `You can invite up to ${MAX_INVITES} people at a time.`,
+    });
   if (!message)
     return res
       .status(400)
