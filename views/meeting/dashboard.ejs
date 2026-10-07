@@ -52,6 +52,14 @@
           <%= m.scheduled_at %> (<%= m.duration_min %> min)
         </p>
         <p class="muted">Room code: <code><%= m.room_code %></code></p>
+        <% if (m.status !== 'ended') { %>
+          <div class="link-row">
+            <span class="muted">Meeting link:</span>
+            <input type="text" class="link-input" readonly aria-label="Meeting link"
+              value="<%= baseUrl %>/join/<%= m.room_code %>">
+            <button type="button" class="btn ghost sm" data-copy-link>Copy link</button>
+          </div>
+        <% } %>
       </div>
       <span class="badge <%= m.status %>"><%= m.status %></span>
     </div>
@@ -137,5 +145,6 @@
   </form>
 </dialog>
 <script src="/js/invite.js"></script>
+<script src="/js/copylink.js"></script>
 </main>
 <%- include('../partials/footer') %>

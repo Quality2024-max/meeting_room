@@ -18,6 +18,7 @@ import registerRoomSockets from "./sockets/roomSocket.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
+app.set('trust proxy', 1); // behind Render's proxy -> req.protocol becomes https
 
 // ---------- VIEW ENGINE ----------
 app.set("view engine", "ejs");

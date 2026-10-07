@@ -294,6 +294,12 @@
   shareAudioChk.addEventListener('change', () => store.set('shareAudio', shareAudioChk.checked ? '1' : '0'));
 
   const AUDIO_CONSTRAINTS = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+  // ask the camera for HD instead of the 640x480 browser default
+  const VIDEO_CONSTRAINTS = { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } };
+  // ask the screen share for Full HD / 30 fps
+  const SCREEN_CONSTRAINTS = { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } };
+  // recording quality: 720p @ 30 fps ~ 4 Mbps (~30 MB per minute)
+  const REC_QUALITY = { width: 1280, height: 720, fps: 30, videoBps: 4000000, audioBps: 192000 };
 
   async function initMedia() {
     const notices = [];
@@ -310,7 +316,7 @@
       try {
         const savedMic = store.get('micId');
         const stream = await md.getUserMedia({
-          video: true,
+          video: VIDEO_CONSTRAINTS,
           audio: savedMic ? { ...AUDIO_CONSTRAINTS, deviceId: { ideal: savedMic } } : AUDIO_CONSTRAINTS
         });
         camTrack = stream.getVideoTracks()[0] || null;
@@ -327,7 +333,7 @@
           // One device may be missing or busy - try each one separately
           for (const [kind, what] of [['video', 'camera'], ['audio', 'microphone']]) {
             try {
-              const s = await md.getUserMedia({ [kind]: kind === 'audio' ? AUDIO_CONSTRAINTS : true });
+              const s = await md.getUserMedia({ [kind]: kind === 'audio' ? AUDIO_CONSTRAINTS : VIDEO_CONSTRAINTS });
               if (kind === 'video') camTrack = s.getVideoTracks()[0] || null;
               else micTrack = s.getAudioTracks()[0] || null;
             } catch (err) {
@@ -421,11 +427,23 @@
   });
 
   // ---------- Peer connections ----------
+  // Browsers cap WebRTC video at a low bitrate by default, which makes what the host records look soft.
+  function raiseVideoBitrate(sender) {
+    try {
+      const params = sender.getParameters();
+      if (!params.encodings || !params.encodings.length) params.encodings = [{}];
+      params.encodings[0].maxBitrate = 2500000; // 2.5 Mbps per participant
+      params.encodings[0].maxFramerate = 30;
+      sender.setParameters(params).catch(() => {});
+    } catch (e) { /* not supported - keep browser defaults */ }
+  }
+
   function createPeer(id, name, host) {
     const pc = new RTCPeerConnection(rtcConfig);
     peers[id] = pc;
     if (outAudio || micTrack) audioSenders[id] = pc.addTrack(outAudio || micTrack, localStream);
     videoSenders[id] = pc.addTrack(screenTrack || camTrack, localStream);
+    raiseVideoBitrate(videoSenders[id]);
     pc.onicecandidate = (e) => {
       if (e.candidate) socket.emit('signal', { to: id, data: { candidate: e.candidate } });
     };
@@ -498,7 +516,7 @@
     let stream;
     try {
       stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
+        video: SCREEN_CONSTRAINTS,
         audio: shareAudioChk.checked ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false } : false,
         ...(shareAudioChk.checked ? { systemAudio: 'include' } : {})
       });
@@ -791,6 +809,8 @@
     if (!rec) return;
     const { canvas } = rec;
     const g = canvas.getContext('2d');
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = 'high';
     const W = canvas.width, H = canvas.height;
     g.fillStyle = '#0b1020';
     g.fillRect(0, 0, W, H);
@@ -849,15 +869,15 @@
     const AC = window.AudioContext || window.webkitAudioContext;
     const mime = pickRecMime();
     const canvas = document.createElement('canvas');
-    canvas.width = 1280;
-    canvas.height = 720;
+    canvas.width = REC_QUALITY.width;
+    canvas.height = REC_QUALITY.height;
     // 48 kHz = the sample rate WebRTC audio uses, so nothing gets resampled (resampling causes crackles/gaps)
     let ctx;
     try { ctx = new AC({ sampleRate: 48000, latencyHint: 'playback' }); } catch (e) { ctx = new AC(); }
     await ctx.resume().catch(() => {});
     const dest = ctx.createMediaStreamDestination();
 
-    const FPS = 24;
+    const FPS = REC_QUALITY.fps;
     let capture = canvas.captureStream(0);
     let videoTrack = capture.getVideoTracks()[0];
     const manualFrames = !!(videoTrack && typeof videoTrack.requestFrame === 'function');
@@ -870,7 +890,7 @@
 
     const stream = new MediaStream([videoTrack, ...dest.stream.getAudioTracks()]);
     try {
-      rec.recorder = new MediaRecorder(stream, Object.assign({ videoBitsPerSecond: 2000000, audioBitsPerSecond: 128000 }, mime ? { mimeType: mime } : {}));
+      rec.recorder = new MediaRecorder(stream, Object.assign({ videoBitsPerSecond: REC_QUALITY.videoBps, audioBitsPerSecond: REC_QUALITY.audioBps }, mime ? { mimeType: mime } : {}));
     } catch (e) {
       rec.stopTicker();
       ctx.close().catch(() => {});
