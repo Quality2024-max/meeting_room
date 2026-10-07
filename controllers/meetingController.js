@@ -6,8 +6,8 @@ import Recording from "../models/recordingModel.js";
 import ChatMessage from "../models/chatMessageModel.js";
 import { fileURLToPath } from "node:url";
 import { signGuestToken } from "../middlewares/authMiddleware.js";
-import { sendMail, isMailConfigured } from '../services/mailService.js';
-import { error } from "node:console";
+import { sendMail, isMailConfigured } from "../services/mailService.js";
+import { buildInvite } from "../services/inviteMail.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REC_DIR = path.join(__dirname, "..", "recordings");
@@ -28,6 +28,7 @@ export const getDashboard = async (req, res) => {
     meetings,
     recordings,
     joinError: req.query.error || null,
+    baseUrl: appUrl(req),
   });
 };
 
@@ -52,7 +53,7 @@ export const create = async (req, res) => {
     scheduledAt: scheduled_at,
     durationMin: parseInt(duration_min, 10) || 30,
   });
-  console.log(Meeting);
+  // console.log(Meeting);
   res.redirect("/dashboard");
 };
 
@@ -210,6 +211,7 @@ export const invite = async (req, res) => {
     return res
       .status(400)
       .json({ ok: false, error: "The email message cannot be empty." });
+
   const invalid = emails.filter((e) => !EMAIL_RE.test(e));
   if (invalid.length)
     return res

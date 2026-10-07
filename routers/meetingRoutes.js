@@ -27,7 +27,7 @@ router.get("/dashboard", wrap(getDashboard));
 router.get("/meetings/new", newForm);
 router.post("/meetings", create);
 router.post("/join", join);
-router.post("meetings/:id/invite", wrap(invite));
+router.post("/meetings/:id/invite", wrap(invite));
 router.post("/meetings/:id/end", wrap(end));
 router.post("/meetings/:id/feedback", wrap(feedback));
 router.post("/meetings/:id/delete", wrap(remove));

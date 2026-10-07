@@ -1,5 +1,4 @@
 import db from "../config/db.js";
-import { create } from "../controllers/meetingController.js";
 
 const Meeting = {
   async findByHost(hostId) {
