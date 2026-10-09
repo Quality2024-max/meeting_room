@@ -85,6 +85,6 @@ process.on("unhandledRejection", (err) =>
 const PORT = process.env.PORT || 2000;
 server.listen(PORT, () => {
   console.log(
-    `Server is runing on http://localhost:${PORT}\nhttps://meeting-room-lunw.onrender.com/login`,
+    `Server is runing on http://localhost:${PORT}\nhttps://meeting-room-lunw.onrender.com`,
   );
 });
