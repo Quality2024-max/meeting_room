@@ -1,7 +1,7 @@
 import db from "../config/db.js";
-
+// Recording model for interacting with the recordings table in the database
 const Recording = {
-  // All recordings of a host's meetings, newest first
+  // Get all recordings for a host (via their meetings)
   async findByHost(hostId) {
     const [rows] = await db.query(
       `SELECT r.* FROM recordings r JOIN meetings m ON m.id = r.meeting_id
@@ -11,7 +11,7 @@ const Recording = {
     return rows;
   },
 
-  // File names of one meeting's recordings (only if the host owns the meeting)
+  // Get all recordings for a meeting (only if the host owns the meeting)
   async fileNamesByMeeting(meetingId, hostId) {
     const [rows] = await db.query(
       `SELECT r.file_name FROM recordings r JOIN meetings m ON m.id = r.meeting_id

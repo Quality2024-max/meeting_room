@@ -2,6 +2,7 @@ import "dotenv/config";
 import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 
+// JWT-based authentication middleware for Express.js
 export const signToken = (user) => {
   return jwt.sign(
     { id: user.id, name: user.name, email: user.email },
@@ -42,7 +43,7 @@ export const readGuest = (token) => {
   }
 };
 
-// Makes req.user / res.locals.user available on every request
+// middleware to attach the user or guest to the request and response locals
 export function attachUser(req, res, next) {
   req.user = readUser(req.cookies.token);
   req.guest = req.user ? null : readGuest(req.cookies.guest_token);

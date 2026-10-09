@@ -1,4 +1,4 @@
-<%- include('../partials/header', { title: 'Log in' }) %>
+<%- include('../partials/header', { title: 'Register' }) %>
 <%- include('../partials/navbar') %>
 
 <main class="auth">
@@ -17,9 +17,9 @@
       <p class="auth-sub">It only takes a few seconds.</p>
       <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
       <form method="post" action="/register" class="stack">
-        <label>Full name <input type="text" name="name" placeholder="Rahul Sharma" autocomplete="name" required autofocus></label>
-        <label>Email <input type="email" name="email" placeholder="you@company.com" autocomplete="email" required></label>
-        <label>Password <input type="password" name="password" minlength="6" placeholder="At least 6 characters" autocomplete="new-password" required>
+        <label>Full name <input type="text" name="name" placeholder="Enter your full name" autocomplete="name" required autofocus></label>
+        <label>Email <input type="email" name="email" placeholder="Enter your E-mail" autocomplete="email" required></label>
+        <label>Create New Password <input type="password" name="password" minlength="6" placeholder="Create password minimum 6 digit" autocomplete="new-password" required>
           <span class="hint">Use 6 or more characters.</span></label>
         <button class="btn lg block" type="submit">Create account</button>
       </form>

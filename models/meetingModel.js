@@ -1,5 +1,5 @@
 import db from "../config/db.js";
-
+// Meeting model for interacting with the meetings table in the database
 const Meeting = {
   async findByHost(hostId) {
     const [rows] = await db.query(

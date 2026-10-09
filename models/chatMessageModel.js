@@ -1,5 +1,5 @@
 import db from "../config/db.js";
-
+// ChatMessage model for interacting with the chat_messages table in the database
 const ChatMessage = {
   async listByMeeting(meetingId, limit = 100) {
     const [rows] = await db.query(

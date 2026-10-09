@@ -1,5 +1,5 @@
 // Builds the invitation email. The join link and the meeting code are ALWAYS added
-// by us, even if the host edits or deletes parts of the message body.
+// by us, even if the host edits or deletes parts of the message body
 
 const esc = (s) =>
   String(s)

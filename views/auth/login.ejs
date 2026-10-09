@@ -17,8 +17,8 @@
       <p class="auth-sub">Log in to your MeetRoom account.</p>
       <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
       <form method="post" action="/login" class="stack">
-        <label>Email <input type="email" name="email" placeholder="you@company.com" autocomplete="email" required autofocus></label>
-        <label>Password <input type="password" name="password" placeholder="Your password" autocomplete="current-password" required></label>
+        <label>Email <input type="email" name="email" placeholder="Enter your email" autocomplete="email" required autofocus></label>
+        <label>Password <input type="password" name="password" placeholder="Enter your password" autocomplete="current-password" required></label>
         <button class="btn lg block" type="submit">Log in</button>
       </form>
       <p class="auth-switch">New here? <a href="/register">Create an account</a></p>

@@ -1,3 +1,4 @@
+// Invite dialog functionality for sending meeting invitations via email
 (() => {
   const dlg = document.getElementById("inviteDialog");
   if (!dlg) return;
@@ -11,13 +12,14 @@
   const okEl = document.getElementById("inviteOk");
   const sendBtn = document.getElementById("inviteSend");
   let meetingId = null;
-
+  // Helper function to show or hide an element with optional text
   function show(el, text) {
     el.textContent = text || "";
     el.hidden = !text;
   }
   const close = () => dlg.close();
 
+  // Event listeners for opening the invite dialog and handling form submission
   document.querySelectorAll("[data-invite]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const d = btn.dataset;
@@ -34,12 +36,14 @@
     });
   });
 
+  // Event listeners for closing the invite dialog
   document.getElementById("inviteClose").addEventListener("click", close);
   document.getElementById("inviteCancel").addEventListener("click", close);
   dlg.addEventListener("click", (e) => {
     if (e.target === dlg) close();
   }); // click on backdrop
 
+  // Form submission handler for sending invitations
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     show(errEl, "");

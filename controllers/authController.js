@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/userModel.js";
 import { signToken } from "../middlewares/authMiddleware.js";
 
+// Cookie options for authentication token
 const cookieOpts = {
   httpOnly: true,
   sameSite: "lax",
@@ -14,7 +15,7 @@ export const showLogin = (req, res) => {
 };
 
 export const showRegister = (req, res) => {
-  // if (req.user) return res.redirect('/dashboard');
+  if (req.user) return res.redirect("/dashboard");
   res.render("auth/register", { error: null });
 };
 

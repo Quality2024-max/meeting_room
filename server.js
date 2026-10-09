@@ -18,7 +18,7 @@ import registerRoomSockets from "./sockets/roomSocket.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
-app.set('trust proxy', 1); // behind Render's proxy -> req.protocol becomes https
+app.set("trust proxy", 1); // behind Render's proxy -> req.protocol becomes https
 
 // ---------- VIEW ENGINE ----------
 app.set("view engine", "ejs");
@@ -40,12 +40,13 @@ app.use((req, res, next) => {
 });
 
 // ---------- ROUTES ----------
+// default route redirects to /dashboard if logged in, otherwise to /login
 app.get("/", (req, res) => res.redirect(req.user ? "/dashboard" : "/login"));
 app.use("/", authRoutes);
 app.use("/", meetingRoutes);
 app.use("/", recordingRoutes);
 
-// ---------- 404 NOT FOUND ----------
+//---------- 404 NOT FOUND ----------
 app.use((req, res, next) => {
   res.status(404).render("errors/error", {
     title: "Page Not Found",
